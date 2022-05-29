@@ -29,14 +29,9 @@ STRCOMPILE="$(color 2 Compiling)"
 RECOMPILE=false
 COMPILEDIR="release_build"
 COMPILEFLAGS="-DCMAKE_INSTALL_PREFIX="
-if [[ "$(uname -s)" == *"arm64"* ]]; then
-  COMPILEFLAGS="$COMPILEFLAGS -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64 -DCMAKE_PREFIX_PATH=$COMPILEDIR"
-fi
-
 export DESTDIR="$(cd "$(dirname "$0")" && pwd)"
 BUILDTYPE="$(color 6 release)"
 SIGNER="Developer ID Application: Shiny Computers Leasing LLC (MM5YXC7T6E)"
-
 
 for arg in "$@"; do
   case $arg in
@@ -77,6 +72,13 @@ cd $COMPILEDIR
 STRTHREADS="threads"
 if [ $THREADS -eq 1 ]; then
   STRTHREADS="thread"
+fi
+
+if [[ "$(uname -a)" == *"arm64"* ]]; then
+  COMPILEFLAGS="$COMPILEFLAGS -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+  lipo -create /opt/homebrew/Cellar/sdl2/2.0.22/lib/libSDL2.dylib /usr/local/homebrew/Cellar/sdl2/2.0.22/lib/libSDL2.dylib -output $DESTDIR/$COMPILEDIR/libSDL2.dylib
+  lipo -create /opt/homebrew/Cellar/sdl2/2.0.22/lib/libSDL2main.a /usr/local/homebrew/Cellar/sdl2/2.0.22/lib/libSDL2main.a -output $DESTDIR/$COMPILEDIR/libSDL2main.a
+  mv -f $DESTDIR/$COMPILEDIR/libSDL2* /opt/homebrew/Cellar/sdl2/2.0.22/lib/
 fi
 
 # Now compile the source code and install it in server's directory
