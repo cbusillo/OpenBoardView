@@ -76,9 +76,14 @@ fi
 
 if [[ "$(uname -a)" == *"arm64"* ]]; then
   COMPILEFLAGS="$COMPILEFLAGS -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
-  lipo -create /opt/homebrew/Cellar/sdl2/2.0.22/lib/libSDL2.dylib /usr/local/homebrew/Cellar/sdl2/2.0.22/lib/libSDL2.dylib -output $DESTDIR/$COMPILEDIR/libSDL2.dylib
-  lipo -create /opt/homebrew/Cellar/sdl2/2.0.22/lib/libSDL2main.a /usr/local/homebrew/Cellar/sdl2/2.0.22/lib/libSDL2main.a -output $DESTDIR/$COMPILEDIR/libSDL2main.a
-  mv -f $DESTDIR/$COMPILEDIR/libSDL2* /opt/homebrew/Cellar/sdl2/2.0.22/lib/
+  brew remove sdl2
+  brew install sdl2
+  arch -x86_64 /usr/local/homebrew/bin/brew remove sdl2
+  arch -x86_64 /usr/local/homebrew/bin/brew install sdl2
+  
+  lipo -create $(brew --prefix)/Cellar/sdl2/*/lib/libSDL2.dylib /usr/local/homebrew/Cellar/sdl2/*/lib/libSDL2.dylib -output $DESTDIR/$COMPILEDIR/libSDL2.dylib
+  lipo -create $(brew --prefix)/Cellar/sdl2/*/lib/libSDL2main.a /usr/local/homebrew/Cellar/sdl2/*/lib/libSDL2main.a -output $DESTDIR/$COMPILEDIR/libSDL2main.a
+  mv -f $DESTDIR/$COMPILEDIR/libSDL2* $(brew --prefix)/Cellar/sdl2/*/lib/
 fi
 
 # Now compile the source code and install it in server's directory
