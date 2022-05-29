@@ -29,8 +29,13 @@ STRCOMPILE="$(color 2 Compiling)"
 RECOMPILE=false
 COMPILEDIR="release_build"
 COMPILEFLAGS="-DCMAKE_INSTALL_PREFIX="
+if [[ "$(uname -s)" == *"arm64"* ]]; then
+  COMPILEFLAGS="$COMPILEFLAGS -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64 -DCMAKE_PREFIX_PATH=$COMPILEDIR"
+fi
+
 export DESTDIR="$(cd "$(dirname "$0")" && pwd)"
 BUILDTYPE="$(color 6 release)"
+SIGNER="Developer ID Application: Shiny Computers Leasing LLC (MM5YXC7T6E)"
 
 
 for arg in "$@"; do
@@ -62,7 +67,7 @@ if [ $THREADS -lt 1 ]; then
   THREADS=1
 fi
 if [ "$RECOMPILE" = true ]; then
-  rm -rf $COMPILEDIR
+  rm -rf $COMPILEDIR openboardview.app OpenBoardView-*-Darwin.dmg
 fi
 if [ ! -d $COMPILEDIR ]; then
   mkdir $COMPILEDIR
@@ -90,8 +95,11 @@ fi
 case "$(uname -s)" in
   *Darwin*)
     # Generate DMG
+    codesign --deep --force --verbose --sign "$SIGNER" ../openboardview.app
+    codesign --deep --force --verbose --sign "$SIGNER" $DESTDIR/$COMPILEDIR/src/openboardview/openboardview.app
     make package
     [ "$?" != "0" ] && color 1 "MAKE PACKAGE FAILED" && exit 1
+    codesign --deep --force --verbose --sign "$SIGNER" ../OpenBoardView-*-Darwin.dmg
     ;;
   *)
     # Give right execution permissions to executables
